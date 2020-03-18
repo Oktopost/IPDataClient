@@ -30,6 +30,13 @@ class IPDataClient extends AbstractConnector
 			->setPath($ip)
 			->send();
 		
-		return ResponseParser::parse($response);
+		$data = ResponseParser::parse($response);
+		
+		if ($data)
+		{
+			$data->IP = $ip;
+		}
+		
+		return $data;
 	}
 }

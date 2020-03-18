@@ -3,6 +3,10 @@ namespace IPDataClient\Data;
 
 
 use Gazelle\IResponse;
+use Structura\Strings;
+use IPDataClient\Data\Parts\ASNData;
+use IPDataClient\Data\Parts\TimezoneData;
+
 use Objection\LiteSetup;
 use Objection\LiteObject;
 
@@ -23,6 +27,9 @@ use Objection\LiteObject;
  * @property string|null	$Flag
  * @property string|null	$EmojiFlag
  * @property string|null	$EmojiUnicode
+ * 
+ * @property ASNData|null		$ASN
+ * @property TimezoneData|null	$Timezone
  * 
  * @property array 			$OriginalData
  * @property IResponse		$OriginalResponse
@@ -52,9 +59,33 @@ class IPDataResponse extends LiteObject
 			'EmojiFlag'			=> LiteSetup::createString(null),
 			'EmojiUnicode'		=> LiteSetup::createString(null),
 			 
+			'ASN'				=> LiteSetup::createInstanceOf(ASNData::class),
+			'Timezone'			=> LiteSetup::createInstanceOf(TimezoneData::class),
+			
 			'OriginalData'		=> LiteSetup::createArray([]),
 			'OriginalResponse'	=> LiteSetup::createInstanceOf(IResponse::class),
 			'RequestsCount'		=> LiteSetup::createString(0)
 		];
+	}
+	
+	
+	public function getMaskedIP(int $sectionsToMask = 2): ?string
+	{
+		$ip = $this->IP;
+		$delimiter = '.';
+		
+		if (Strings::contains($ip, ':'))
+		{
+			$delimiter = ':';
+		}
+		
+		$ip = explode($delimiter, $ip);
+		
+		for ($i = 1; $i <= min($sectionsToMask, count($ip)); $i++)
+		{
+			$ip[count($ip) - $i] = '*';
+		}
+		
+		return implode($delimiter, $ip);
 	}
 }
